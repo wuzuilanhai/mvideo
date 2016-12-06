@@ -6,7 +6,8 @@ package com.mvideo.common.constant;
 public interface SystemConstants {
     enum RedisConfig {
         EXPIRATION("DEFAULT", 10),
-        EXPIRATION_OUT("UNKNOWN", -1);;
+        EXPIRATION_OUT("UNKNOWN", -1)
+        ;
 
         public static RedisConfig getByKey(String key) {
             for (RedisConfig redisConfig : RedisConfig.values()) {
