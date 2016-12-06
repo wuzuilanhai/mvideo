@@ -13,7 +13,20 @@
     select 
     <include refid="Base_Column_List" />
     from admin
-    where id = #{id,jdbcType=INTEGER}
+    where  = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="findAdmin" parameterType="com.mvideo.admin.dto.AdminQuery" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from admin
+    <where>
+      <if test="loginName != null">
+        and login_name = #{loginName,jdbcType=VARCHAR}
+      </if>
+      <if test="loginPassword != null">
+        and login_password = #{loginPassword,jdbcType=VARCHAR}
+      </if>
+    </where>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from admin
