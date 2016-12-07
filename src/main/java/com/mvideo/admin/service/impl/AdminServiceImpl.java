@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Created by admin on 16/12/6.
  */
 @RestController
-@RequestMapping("/adminService")
+@RequestMapping("/admin")
 public class AdminServiceImpl implements IAdminService {
 
     @Autowired
