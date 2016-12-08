@@ -1,7 +1,11 @@
 package com.mvideo.video.util;
 
+import com.mvideo.video.dal.dao.VideoCheckMapper;
+import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dto.Plupload;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -18,11 +22,15 @@ import java.util.List;
 @Component
 public class PluploadUtil {
 
+    @Autowired
+    private VideoCheckMapper videoCheckMapper;
+
     public void upload(Plupload plupload, File pluploadDir) {
         String fileName = "" + System.currentTimeMillis() + plupload.getName();//在服务器内生成唯一文件名
         upload(plupload, pluploadDir, fileName);
     }
 
+    @Transactional
     private void upload(Plupload plupload, File pluploadDir, String fileName) {
 
         int chunks = plupload.getChunks();//用户上传文件被分隔的总块数
@@ -46,14 +54,30 @@ public class PluploadUtil {
                         plupload.setMultipartFile(multipartFile);//手动向Plupload对象传入MultipartFile属性值
                         File targetFile = new File(pluploadDir + "/" + fileName);//新建目标文件，只有被流写入时才会真正存在
                         if (chunks > 1) {//用户上传资料总块数大于1，要进行合并
+                            String prefixName = pluploadDir.getPath() + "/" + plupload.getName() + "_tmp_";
+                            String tmpFileName = prefixName + plupload.getChunk();
+                            File tempFile = new File(tmpFileName);
+                            //保存每一块的内容在临时文件中
+                            savePluploadFile(multipartFile.getInputStream(), tempFile, false);
+                            //更新数据库表video_check的数据
+                            VideoCheck videoCheck = new VideoCheck();
+                            videoCheck.setCurrentChunk(plupload.getChunk());
+                            List<VideoCheck> findVideoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(prefixName);
+                            if (findVideoChecks.size() == 0) {
+                                videoCheck.setTmpFileName(tmpFileName);
+                                videoCheckMapper.insert(videoCheck);
+                            } else {
+                                videoCheck.setId(findVideoChecks.get(0).getId());
+                                videoCheckMapper.update(videoCheck);
+                            }
 
-                            File tempFile = new File(pluploadDir.getPath() + "/" + multipartFile.getName());
-                            //第一块直接从头写入，不用从末端写入
-                            savePluploadFile(multipartFile.getInputStream(), tempFile, nowChunk == 0 ? false : true);
-
-                            if (chunks - nowChunk == 1) {//全部块已经上传完毕，此时targetFile因为有被流写入而存在，要改文件名字
-                                tempFile.renameTo(targetFile);
-
+                            if (chunks - nowChunk == 1) {//全部块已经上传完毕，合并所有块文件
+                                for (int i = 0; i < chunks; i++) {
+                                    File srcFile = new File(prefixName +i);
+                                    FileInputStream fi = new FileInputStream(srcFile);
+                                    savePluploadFile(fi, targetFile, i == 0 ? false : true);
+                                    srcFile.delete();
+                                }
                                 //每当文件上传完毕，将上传信息插入数据库
                                 //Timestamp now = new Timestamp(System.currentTimeMillis());
                                 //youandmeService.uploadInfo(fileName,((User)(plupload.getRequest().getSession().getAttribute("user"))).getUsername(),now);
@@ -68,7 +92,7 @@ public class PluploadUtil {
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
