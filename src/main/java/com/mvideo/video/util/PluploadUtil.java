@@ -1,7 +1,10 @@
 package com.mvideo.video.util;
 
+import com.mvideo.video.constant.VideoConstants;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
+import com.mvideo.video.dal.dao.VideoStateMapper;
 import com.mvideo.video.dal.po.VideoCheck;
+import com.mvideo.video.dal.po.VideoState;
 import com.mvideo.video.dto.Plupload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,8 +28,12 @@ public class PluploadUtil {
     @Autowired
     private VideoCheckMapper videoCheckMapper;
 
+    @Autowired
+    private VideoStateMapper videoStateMapper;
+
+
     public void upload(Plupload plupload, File pluploadDir) {
-        String fileName = "" + System.currentTimeMillis() + plupload.getName();//在服务器内生成唯一文件名
+        String fileName = plupload.getName();//在服务器内生成唯一文件名,TODO
         upload(plupload, pluploadDir, fileName);
     }
 
@@ -53,6 +60,14 @@ public class PluploadUtil {
 
                         plupload.setMultipartFile(multipartFile);//手动向Plupload对象传入MultipartFile属性值
                         File targetFile = new File(pluploadDir + "/" + fileName);//新建目标文件，只有被流写入时才会真正存在
+                        if (plupload.getChunk() == 0) {
+                            //保存视频状态
+                            VideoState videoState = new VideoState();
+                            videoState.setName("等待上传");
+                            videoState.setLevel(1);
+                            videoState.setVideoPath(targetFile.getPath());
+                            videoStateMapper.insert(videoState);
+                        }
                         if (chunks > 1) {//用户上传资料总块数大于1，要进行合并
                             String prefixName = pluploadDir.getPath() + "/" + plupload.getName() + "_tmp_";
                             String tmpFileName = prefixName + plupload.getChunk();
@@ -73,22 +88,20 @@ public class PluploadUtil {
 
                             if (chunks - nowChunk == 1) {//全部块已经上传完毕，合并所有块文件
                                 for (int i = 0; i < chunks; i++) {
-                                    File srcFile = new File(prefixName +i);
+                                    File srcFile = new File(prefixName + i);
                                     FileInputStream fi = new FileInputStream(srcFile);
                                     savePluploadFile(fi, targetFile, i == 0 ? false : true);
                                     srcFile.delete();
                                 }
                                 //每当文件上传完毕，将上传信息插入数据库
-                                //Timestamp now = new Timestamp(System.currentTimeMillis());
-                                //youandmeService.uploadInfo(fileName,((User)(plupload.getRequest().getSession().getAttribute("user"))).getUsername(),now);
+                                updateVideoState(targetFile);
                             }
                         } else {
                             //只有一块，就直接拷贝文件内容
                             multipartFile.transferTo(targetFile);
 
                             //每当文件上传完毕，将上传信息插入数据库
-                            //Timestamp now = new Timestamp(System.currentTimeMillis());
-                            //youandmeService.uploadInfo(fileName, ((User) (plupload.getRequest().getSession().getAttribute("user"))).getUsername(), now);
+                            updateVideoState(targetFile);
                         }
                     }
                 }
@@ -96,6 +109,13 @@ public class PluploadUtil {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void updateVideoState(File targetFile) throws Exception {
+        VideoState videoState = videoStateMapper.selectByVideoPath(targetFile.getPath());
+        videoState.setLevel(2);
+        videoState.setName(VideoConstants.Video.getVideoState(2).getName());
+        videoStateMapper.update(videoState);
     }
 
     private void savePluploadFile(InputStream inputStream, File tempFile, boolean flag) {

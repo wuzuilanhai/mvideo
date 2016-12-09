@@ -41,6 +41,8 @@
 
 # -- upload directory
 **/upload/
+**/converts/
+**/thumbnails/
 /.settings
 #/.project
 /target/

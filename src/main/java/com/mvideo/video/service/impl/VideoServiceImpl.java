@@ -7,6 +7,7 @@ import com.mvideo.video.dto.CheckUpload;
 import com.mvideo.video.dto.Plupload;
 import com.mvideo.video.util.PluploadUtil;
 import com.mvideo.video.service.IVideoService;
+import com.mvideo.video.util.VideoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,9 @@ public class VideoServiceImpl implements IVideoService {
     private PluploadUtil pluploadUtil;
 
     @Autowired
+    private VideoUtil videoUtil;
+
+    @Autowired
     private VideoCheckMapper videoCheckMapper;
 
     @RequestMapping("/checkUpload")
@@ -34,8 +38,8 @@ public class VideoServiceImpl implements IVideoService {
         List<VideoCheck> videoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(tmpFileName);
         CheckResult checkResult = new CheckResult();
         if (videoChecks.size() != 0) {
-            Integer currentChunk=videoChecks.get(0).getCurrentChunk();
-            checkResult.setOffset((currentChunk+1)*checkUpload.getChunk_size());
+            Integer currentChunk = videoChecks.get(0).getCurrentChunk();
+            checkResult.setOffset((currentChunk + 1) * checkUpload.getChunk_size());
             checkResult.setMessage("exist");
         } else {
             checkResult.setMessage("not exist");
@@ -52,7 +56,17 @@ public class VideoServiceImpl implements IVideoService {
         if (!dir.exists()) {
             dir.mkdirs();
         }
+        File convertDir = new File("converts");
+        if (!convertDir.exists()) {
+            convertDir.mkdirs();
+        }
+        File thumbnails = new File("thumbnails");
+        if (!thumbnails.exists()) {
+            thumbnails.mkdirs();
+        }
         pluploadUtil.upload(plupload, dir);
+//        String name = plupload.getName().substring(0, plupload.getName().lastIndexOf("."));
+//        videoUtil.process(dir + "/" + plupload.getName(), convertDir + "/" + name + ".mp4", thumbnails + "/" + name + ".jpg");
     }
 
 }
