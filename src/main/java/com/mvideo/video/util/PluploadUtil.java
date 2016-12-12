@@ -1,5 +1,7 @@
 package com.mvideo.video.util;
 
+import com.mvideo.configuration.dal.po.Configuration;
+import com.mvideo.configuration.service.IConfigurationService;
 import com.mvideo.video.constant.VideoConstants;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
 import com.mvideo.video.dal.dao.VideoStateMapper;
@@ -7,6 +9,9 @@ import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dal.po.VideoState;
 import com.mvideo.video.dto.Plupload;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
@@ -14,16 +19,22 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Plupload Service模块
+ * Plupload 模块
  * <p>
  * Created by admin on 16/12/7.
  */
 @Component
-public class PluploadUtil {
+public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private VideoCheckMapper videoCheckMapper;
@@ -31,6 +42,17 @@ public class PluploadUtil {
     @Autowired
     private VideoStateMapper videoStateMapper;
 
+    @Autowired
+    private IConfigurationService configurationService;
+
+    @Value("${ffmpeg.video.suffix}")
+    private String convertVideoSuffix;
+
+    @Value("${ffmpeg.video.thumbnail.img.suffix}")
+    private String thumbnailImgSuffix;
+
+    @Autowired
+    private VideoUtil videoUtil;
 
     public void upload(Plupload plupload, File pluploadDir) {
         String fileName = plupload.getName();//在服务器内生成唯一文件名,TODO
@@ -63,8 +85,8 @@ public class PluploadUtil {
                         if (plupload.getChunk() == 0) {
                             //保存视频状态
                             VideoState videoState = new VideoState();
-                            videoState.setName("等待上传");
-                            videoState.setLevel(1);
+                            videoState.setName(VideoConstants.Video.STATE_01.getName());
+                            videoState.setLevel(VideoConstants.Video.STATE_01.getLevel());
                             videoState.setVideoPath(targetFile.getPath());
                             videoStateMapper.insert(videoState);
                         }
@@ -95,6 +117,9 @@ public class PluploadUtil {
                                 }
                                 //每当文件上传完毕，将上传信息插入数据库
                                 updateVideoState(targetFile);
+
+                                //添加数据到延迟队列，开始转码
+                                convertQueue.add(new DelayQueueNode(targetFile, System.currentTimeMillis() + 1000));
                             }
                         } else {
                             //只有一块，就直接拷贝文件内容
@@ -102,6 +127,9 @@ public class PluploadUtil {
 
                             //每当文件上传完毕，将上传信息插入数据库
                             updateVideoState(targetFile);
+
+                            //添加数据到延迟队列，开始转码
+                            convertQueue.add(new DelayQueueNode(targetFile, System.currentTimeMillis() + VideoConstants.CONVERT_TIME_DELAY));
                         }
                     }
                 }
@@ -113,8 +141,8 @@ public class PluploadUtil {
 
     private void updateVideoState(File targetFile) throws Exception {
         VideoState videoState = videoStateMapper.selectByVideoPath(targetFile.getPath());
-        videoState.setLevel(2);
-        videoState.setName(VideoConstants.Video.getVideoState(2).getName());
+        videoState.setLevel(VideoConstants.Video.STATE_02.getLevel());
+        videoState.setName(VideoConstants.Video.STATE_02.getName());
         videoStateMapper.update(videoState);
     }
 
@@ -144,6 +172,98 @@ public class PluploadUtil {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private BlockingQueue<DelayQueueNode<File>> convertQueue = new DelayQueue();
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Map<String, Configuration> configurationMap = new HashMap<>();
+            try {
+                Configuration transcoder_vcodec = configurationService.getConfigurationByName("transcoder_vcodec");
+                Configuration transcoder_bv = configurationService.getConfigurationByName("transcoder_bv");
+                Configuration transcoder_framerate = configurationService.getConfigurationByName("transcoder_framerate");
+                Configuration transcoder_acodec = configurationService.getConfigurationByName("transcoder_acodec");
+                Configuration transcoder_ba = configurationService.getConfigurationByName("transcoder_ba");
+                Configuration transcoder_ar = configurationService.getConfigurationByName("transcoder_ar");
+                Configuration transcoder_ab = configurationService.getConfigurationByName("transcoder_ab");
+                Configuration transcoder_ac = configurationService.getConfigurationByName("transcoder_ac");
+                Configuration transcoder_qscale = configurationService.getConfigurationByName("transcoder_qscale");
+                configurationMap.put("vcodec", transcoder_vcodec);
+                configurationMap.put("bv", transcoder_bv);
+                configurationMap.put("framerate", transcoder_framerate);
+                configurationMap.put("acodec", transcoder_acodec);
+                configurationMap.put("ba", transcoder_ba);
+                configurationMap.put("ar", transcoder_ar);
+                configurationMap.put("ab", transcoder_ab);
+                configurationMap.put("ac", transcoder_ac);
+                configurationMap.put("qscale", transcoder_qscale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            while (true) {
+                try {
+                    //开始转码
+                    File file = convertQueue.take().getValue();
+                    File convertDir = new File("converts");
+                    if (!convertDir.exists()) {
+                        convertDir.mkdirs();
+                    }
+                    File thumbnails = new File("thumbnails");
+                    if (!thumbnails.exists()) {
+                        thumbnails.mkdirs();
+                    }
+                    String name = file.getName().substring(0, file.getName().lastIndexOf("."));
+                    videoUtil.process(file.getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    //springboot容器启动后才执行这个方法
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        new Thread(runnable).start();
+    }
+
+    private static class DelayQueueNode<T> implements Delayed {
+
+        private T v;
+        private long timeout;
+
+        public DelayQueueNode(T v, long time) {
+            this.v = v;
+            this.timeout = time;
+        }
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            return unit.convert(timeout - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int compareTo(Delayed other) {
+            if (other == this)
+                return 0;
+            if (other instanceof DelayQueueNode) {
+                DelayQueueNode x = (DelayQueueNode) other;
+                long diff = timeout - x.timeout;
+                if (diff < 0)
+                    return -1;
+                else
+                    return 1;
+            }
+
+            long d = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MICROSECONDS);
+            return (d == 0) ? 0 : (d < 1) ? -1 : 1;
+        }
+
+        public T getValue() {
+            return v;
         }
     }
 

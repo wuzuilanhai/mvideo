@@ -7,7 +7,6 @@ import com.mvideo.video.dto.CheckUpload;
 import com.mvideo.video.dto.Plupload;
 import com.mvideo.video.util.PluploadUtil;
 import com.mvideo.video.service.IVideoService;
-import com.mvideo.video.util.VideoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +24,6 @@ public class VideoServiceImpl implements IVideoService {
 
     @Autowired
     private PluploadUtil pluploadUtil;
-
-    @Autowired
-    private VideoUtil videoUtil;
 
     @Autowired
     private VideoCheckMapper videoCheckMapper;
@@ -56,17 +52,8 @@ public class VideoServiceImpl implements IVideoService {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File convertDir = new File("converts");
-        if (!convertDir.exists()) {
-            convertDir.mkdirs();
-        }
-        File thumbnails = new File("thumbnails");
-        if (!thumbnails.exists()) {
-            thumbnails.mkdirs();
-        }
+        plupload.setName(plupload.getName().replaceAll(" ", ""));
         pluploadUtil.upload(plupload, dir);
-//        String name = plupload.getName().substring(0, plupload.getName().lastIndexOf("."));
-//        videoUtil.process(dir + "/" + plupload.getName(), convertDir + "/" + name + ".mp4", thumbnails + "/" + name + ".jpg");
     }
 
 }

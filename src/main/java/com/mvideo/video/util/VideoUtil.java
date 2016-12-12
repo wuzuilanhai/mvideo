@@ -1,14 +1,17 @@
 package com.mvideo.video.util;
 
+import com.mvideo.configuration.dal.po.Configuration;
 import com.mvideo.video.constant.VideoConstants;
 import com.mvideo.video.dal.dao.VideoStateMapper;
 import com.mvideo.video.dal.po.VideoState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by admin on 16/12/9.
@@ -16,14 +19,17 @@ import java.util.List;
 @Component
 public class VideoUtil {
 
+    @Value("${ffmpeg.execute.path}")
+    private String ffmpegPath;
+
     @Autowired
     private VideoStateMapper videoStateMapper;
 
-    public void process(String videoPath, String targetPath, String imgTargetPath) throws Exception {
+    public void process(String videoPath, String targetPath, String imgTargetPath, Map<String, Configuration> configurationMap) throws Exception {
         int type = checkContentType(videoPath);
         if (type == 0) {
             generateVideoThumbnailImg(videoPath, imgTargetPath);
-            ffmpegTransVideo(videoPath, targetPath);
+            ffmpegTransVideo(videoPath, targetPath, configurationMap);
         }
     }
 
@@ -62,7 +68,7 @@ public class VideoUtil {
     @Transactional
     private void generateVideoThumbnailImg(String videoPath, String imgPath) throws Exception {
         List<String> command = new java.util.ArrayList<String>();
-        command.add("/usr/local/Cellar/ffmpeg/2.8.5/bin/ffmpeg");
+        command.add(ffmpegPath);
         command.add("-i");
         command.add(videoPath);
         command.add("-f");
@@ -78,8 +84,8 @@ public class VideoUtil {
         boolean success = startConvert(parseCommand(command));
         if (success) {
             VideoState videoState = videoStateMapper.selectByVideoPath(videoPath);
-            videoState.setLevel(3);
-            videoState.setName(VideoConstants.Video.getVideoState(3).getName());
+            videoState.setLevel(VideoConstants.Video.STATE_03.getLevel());
+            videoState.setName(VideoConstants.Video.STATE_03.getName());
             videoStateMapper.update(videoState);
         }
     }
@@ -87,41 +93,42 @@ public class VideoUtil {
     /**
      * 使用ffmpeg转码
      *
-     * @param videoPath  源路径 -- 要转换的视频文件
-     * @param targetPath 目标路径 -- 转换后的视频flv
+     * @param videoPath        源路径 -- 要转换的视频文件
+     * @param targetPath       目标路径 -- 转换后的视频flv
+     * @param configurationMap
      * @return
      */
     @Transactional
-    private void ffmpegTransVideo(String videoPath, String targetPath) throws Exception {
+    private void ffmpegTransVideo(String videoPath, String targetPath, Map<String, Configuration> configurationMap) throws Exception {
         List<String> command = new java.util.ArrayList<String>();
-        command.add("/usr/local/Cellar/ffmpeg/2.8.5/bin/ffmpeg");
+        command.add(ffmpegPath);
         command.add("-i");
         command.add(videoPath);
         command.add("-vcodec");
-        command.add("libx264");
+        command.add(configurationMap.get("vcodec").getVal());
         command.add("-b:v");
-        command.add("500000");
+        command.add(configurationMap.get("bv").getVal());
         command.add("-r");//设置帧频
-        command.add("25");
+        command.add(configurationMap.get("framerate").getVal());
         command.add("-acodec");
-        command.add("libmp3lame");
+        command.add(configurationMap.get("acodec").getVal());
         command.add("-b:a");
-        command.add("64000");
+        command.add(configurationMap.get("ba").getVal());
         command.add("-ar");
-        command.add("22050");
+        command.add(configurationMap.get("ar").getVal());
         command.add("-ab");
-        command.add("64");
+        command.add(configurationMap.get("ab").getVal());
         command.add("-ac");
-        command.add("2");
+        command.add(configurationMap.get("ac").getVal());
         command.add("-qscale");//清晰度    -qscale 4 为最好可是文件大, -qscale 6就可以了
-        command.add("4");
+        command.add(configurationMap.get("qscale").getVal());
         command.add("-y");// 添加参数＂-y＂，该参数指定将覆盖已存在的文件
         command.add(targetPath);
         boolean success = startConvert(parseCommand(command));
         if (success) {
             VideoState videoState = videoStateMapper.selectByVideoPath(videoPath);
-            videoState.setLevel(4);
-            videoState.setName(VideoConstants.Video.getVideoState(4).getName());
+            videoState.setLevel(VideoConstants.Video.STATE_04.getLevel());
+            videoState.setName(VideoConstants.Video.STATE_04.getName());
             videoStateMapper.update(videoState);
         }
     }

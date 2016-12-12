@@ -17,6 +17,12 @@
     from configuration
     where id = #{id,jdbcType=INTEGER}
   </select>
+  <select id="getConfigurationByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from configuration
+      where name = #{name,jdbcType=VARCHAR}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from configuration
     where id = #{id,jdbcType=INTEGER}

@@ -4,6 +4,9 @@ package com.mvideo.video.constant;
  * Created by admin on 16/12/9.
  */
 public interface VideoConstants {
+
+    Integer CONVERT_TIME_DELAY = 1000;
+
     enum Video {
         STATE_01(1, " 等待上传"),
         STATE_02(2, " 等待截图"),
