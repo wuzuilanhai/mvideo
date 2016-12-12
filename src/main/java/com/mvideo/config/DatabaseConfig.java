@@ -55,6 +55,8 @@ public class DatabaseConfig {
         org.apache.ibatis.session.Configuration mybatisConfig = new org.apache.ibatis.session.Configuration();
         mybatisConfig.setMapUnderscoreToCamelCase(true);
         mybatisConfig.setLogImpl(StdOutImpl.class);
+        //开启二级缓存以便使用redis分布式缓存（二级缓存是mapper级别的缓存）
+        mybatisConfig.setCacheEnabled(true);
         bean.setConfiguration(mybatisConfig);
         //分页插件
         PageHelper pageHelper = new PageHelper();

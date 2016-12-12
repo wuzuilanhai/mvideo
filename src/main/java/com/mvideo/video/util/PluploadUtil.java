@@ -4,7 +4,9 @@ import com.mvideo.configuration.dal.po.Configuration;
 import com.mvideo.configuration.service.IConfigurationService;
 import com.mvideo.video.constant.VideoConstants;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
+import com.mvideo.video.dal.dao.VideoMapper;
 import com.mvideo.video.dal.dao.VideoStateMapper;
+import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dal.po.VideoState;
 import com.mvideo.video.dto.Plupload;
@@ -19,10 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -35,6 +34,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> {
+
+    @Autowired
+    private VideoMapper videoMapper;
 
     @Autowired
     private VideoCheckMapper videoCheckMapper;
@@ -144,6 +146,14 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
         videoState.setLevel(VideoConstants.Video.STATE_02.getLevel());
         videoState.setName(VideoConstants.Video.STATE_02.getName());
         videoStateMapper.update(videoState);
+
+        Video video = new Video();
+        video.setName(targetFile.getName());
+        video.setIslive(VideoConstants.IS_NOT_LIVE);
+        video.setLastUpdateTime(new Date());
+        video.setState(VideoConstants.VideoAudit.AUDIT_01.getAuditState());
+        video.setOriurl(targetFile.getPath());
+        videoMapper.insert(video);
     }
 
     private void savePluploadFile(InputStream inputStream, File tempFile, boolean flag) {

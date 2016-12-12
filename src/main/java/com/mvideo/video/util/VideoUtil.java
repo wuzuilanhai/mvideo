@@ -2,7 +2,9 @@ package com.mvideo.video.util;
 
 import com.mvideo.configuration.dal.po.Configuration;
 import com.mvideo.video.constant.VideoConstants;
+import com.mvideo.video.dal.dao.VideoMapper;
 import com.mvideo.video.dal.dao.VideoStateMapper;
+import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +25,12 @@ public class VideoUtil {
     private String ffmpegPath;
 
     @Autowired
+    private VideoMapper videoMapper;
+
+    @Autowired
     private VideoStateMapper videoStateMapper;
 
+    @Transactional
     public void process(String videoPath, String targetPath, String imgTargetPath, Map<String, Configuration> configurationMap) throws Exception {
         int type = checkContentType(videoPath);
         if (type == 0) {
@@ -87,6 +93,10 @@ public class VideoUtil {
             videoState.setLevel(VideoConstants.Video.STATE_03.getLevel());
             videoState.setName(VideoConstants.Video.STATE_03.getName());
             videoStateMapper.update(videoState);
+
+            Video video=videoMapper.selectByOriUrl(videoPath);
+            video.setThumbnailUrl(imgPath);
+            videoMapper.update(video);
         }
     }
 
@@ -130,6 +140,10 @@ public class VideoUtil {
             videoState.setLevel(VideoConstants.Video.STATE_04.getLevel());
             videoState.setName(VideoConstants.Video.STATE_04.getName());
             videoStateMapper.update(videoState);
+
+            Video video=videoMapper.selectByOriUrl(videoPath);
+            video.setThumbnailUrl(targetPath);
+            videoMapper.update(video);
         }
     }
 

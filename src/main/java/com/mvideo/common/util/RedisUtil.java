@@ -1,6 +1,9 @@
 package com.mvideo.common.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -12,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by admin on 16/12/6.
  */
-//@Component
+@Component
 public class RedisUtil {
 
     @Autowired
@@ -23,8 +26,8 @@ public class RedisUtil {
      *
      * @param keys
      */
-    public void remove(final String... keys) {
-        for (String key : keys) {
+    public void remove(final Object... keys) {
+        for (Object key : keys) {
             remove(key);
         }
     }
@@ -45,7 +48,7 @@ public class RedisUtil {
      *
      * @param key
      */
-    public void remove(final String key) {
+    public void remove(final Object key) {
         if (exists(key)) {
             redisTemplate.delete(key);
         }
@@ -57,7 +60,7 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public boolean exists(final String key) {
+    public boolean exists(final Object key) {
         return redisTemplate.hasKey(key);
     }
 
@@ -67,7 +70,7 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public Object get(final String key) {
+    public Object get(final Object key) {
         Object result = null;
         ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
         result = operations.get(key);
@@ -81,11 +84,11 @@ public class RedisUtil {
      * @param value
      * @return
      */
-    public boolean set(final String key, Object value) {
+    public boolean set(final Object key, Object value) {
         boolean result = false;
         try {
             ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
-            operations.set(key, value);
+            operations.set(key.toString(), value);
             result = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,11 +103,11 @@ public class RedisUtil {
      * @param value
      * @return
      */
-    public boolean set(final String key, Object value, Long expireTime) {
+    public boolean set(final Object key, Object value, Long expireTime) {
         boolean result = false;
         try {
             ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
-            operations.set(key, value);
+            operations.set(key.toString(), value);
             redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
             result = true;
         } catch (Exception e) {
@@ -112,4 +115,16 @@ public class RedisUtil {
         }
         return result;
     }
+
+    public int getSize() {
+        Long size = (Long) redisTemplate.execute(new RedisCallback<Long>() {
+
+            @Override
+            public Long doInRedis(RedisConnection redisConnection) throws DataAccessException {
+                return redisConnection.dbSize();
+            }
+        });
+        return size.intValue();
+    }
+
 }
