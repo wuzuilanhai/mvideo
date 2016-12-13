@@ -142,7 +142,7 @@ public class VideoUtil {
             videoStateMapper.update(videoState);
 
             Video video=videoMapper.selectByOriUrl(videoPath);
-            video.setThumbnailUrl(targetPath);
+            video.setUrl(targetPath);
             videoMapper.update(video);
         }
     }

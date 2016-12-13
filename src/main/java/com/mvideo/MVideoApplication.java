@@ -26,7 +26,7 @@ public class MVideoApplication {
     }
 
     @Bean
-    public CrossAreaFilter crossAreaFilter() throws Exception{
+    public CrossAreaFilter crossAreaFilter() throws Exception {
         return new CrossAreaFilter();
     }
 
