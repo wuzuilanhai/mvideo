@@ -1,14 +1,13 @@
-package com.mvideo.category.dal.dao;
+package com.mvideo.category.service;
 
 import com.mvideo.category.dal.po.Category;
-import com.mvideo.common.dao.BaseMapper;
 
 import java.util.List;
 
 /**
- * Created by admin on 16/12/5.
+ * Created by haibiao.zhang on 16/12/25.
  */
-public interface CategoryMapper extends BaseMapper<Category,Integer> {
+public interface ICategoryService {
 
     List<Category> getParentCategorys();
 

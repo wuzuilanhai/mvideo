@@ -5,6 +5,7 @@ import com.mvideo.admin.dal.po.Admin;
 import com.mvideo.admin.dto.AdminQuery;
 import com.mvideo.admin.service.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +20,14 @@ public class AdminServiceImpl implements IAdminService {
     @Autowired
     private AdminMapper adminMapper;
 
+    @Value("${test.condition}")
+    private String test;
+
     @Override
     @RequestMapping("/login")
     public Admin login(@RequestBody AdminQuery adminQuery) throws Exception {
         return adminMapper.findAdmin(adminQuery);
     }
+
 
 }
