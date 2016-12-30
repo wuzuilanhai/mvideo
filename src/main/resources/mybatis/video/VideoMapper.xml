@@ -10,14 +10,17 @@
         <result column="url" property="url" jdbcType="VARCHAR"/>
         <result column="oriurl" property="oriurl" jdbcType="VARCHAR"/>
         <result column="thumbnail_url" property="thumbnailUrl" jdbcType="VARCHAR"/>
+        <result column="real_url" jdbcType="VARCHAR" property="realUrl" />
         <result column="state" property="state" jdbcType="VARCHAR"/>
+        <result column="duration" jdbcType="VARCHAR" property="duration"/>
+        <result column="views" jdbcType="VARCHAR" property="views"/>
         <result column="remark" property="remark" jdbcType="VARCHAR"/>
         <result column="category_id" property="categoryId" jdbcType="INTEGER"/>
         <result column="user_id" property="userId" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, name, intro, last_update_time, islive, url, oriurl, thumbnail_url, state, remark, 
-    category_id, user_id
+    id, name, intro, last_update_time, islive, url, oriurl, thumbnail_url, real_url, state, duration,
+    views, remark, category_id, user_id
   </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
@@ -30,6 +33,12 @@
         <include refid="Base_Column_List"/>
         from video
         where oriurl = #{oriUrl,jdbcType=VARCHAR}
+    </select>
+    <select id="getRecentlyVideos" resultType="com.mvideo.video.dal.po.Video">
+        select
+        <include refid="Base_Column_List"/>
+        from video
+        order by last_update_time desc
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from video
@@ -62,8 +71,17 @@
             <if test="thumbnailUrl != null">
                 thumbnail_url,
             </if>
+            <if test="realUrl != null">
+                real_url,
+            </if>
             <if test="state != null">
                 state,
+            </if>
+            <if test="duration != null">
+                duration,
+            </if>
+            <if test="views != null">
+                views,
             </if>
             <if test="remark != null">
                 remark,
@@ -100,8 +118,17 @@
             <if test="thumbnailUrl != null">
                 #{thumbnailUrl,jdbcType=VARCHAR},
             </if>
+            <if test="realUrl != null">
+                #{real_url,jdbcType=VARCHAR},
+            </if>
             <if test="state != null">
                 #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="duration != null">
+                #{duration,jdbcType=VARCHAR},
+            </if>
+            <if test="views != null">
+                #{views,jdbcType=VARCHAR},
             </if>
             <if test="remark != null">
                 #{remark,jdbcType=VARCHAR},
@@ -138,8 +165,17 @@
             <if test="thumbnailUrl != null">
                 thumbnail_url = #{thumbnailUrl,jdbcType=VARCHAR},
             </if>
+            <if test="realUrl != null">
+                real_url = #{realUrl,jdbcType=VARCHAR},
+            </if>
             <if test="state != null">
                 state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="duration != null">
+                duration = #{duration,jdbcType=VARCHAR},
+            </if>
+            <if test="views != null">
+                views = #{views,jdbcType=VARCHAR},
             </if>
             <if test="remark != null">
                 remark = #{remark,jdbcType=VARCHAR},

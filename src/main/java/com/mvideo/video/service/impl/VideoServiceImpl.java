@@ -1,6 +1,10 @@
 package com.mvideo.video.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
+import com.mvideo.video.dal.dao.VideoMapper;
+import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dto.CheckResult;
 import com.mvideo.video.dto.CheckUpload;
@@ -28,6 +32,9 @@ public class VideoServiceImpl implements IVideoService {
     @Autowired
     private VideoCheckMapper videoCheckMapper;
 
+    @Autowired
+    private VideoMapper videoMapper;
+
     @RequestMapping("/checkUpload")
     public CheckResult checkUpload(CheckUpload checkUpload) throws Exception {
         String tmpFileName = "upload/" + checkUpload.getFilename() + "_tmp_";
@@ -53,7 +60,14 @@ public class VideoServiceImpl implements IVideoService {
             dir.mkdirs();
         }
         plupload.setName(plupload.getName().replaceAll(" ", ""));
-        pluploadUtil.upload(plupload, dir);
+        pluploadUtil.upload(plupload, dir, request);
+    }
+
+    @Override
+    @RequestMapping("/getRecentlyVideos")
+    public List<Video> getRecentlyVideos() {
+        PageHelper.startPage(1, 3);
+        return videoMapper.getRecentlyVideos();
     }
 
 }

@@ -20,6 +20,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -56,7 +57,10 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
     @Autowired
     private VideoUtil videoUtil;
 
-    public void upload(Plupload plupload, File pluploadDir) {
+    private String projectUrl;
+
+    public void upload(Plupload plupload, File pluploadDir, HttpServletRequest request) {
+        projectUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
         String fileName = plupload.getName();//在服务器内生成唯一文件名,TODO
         upload(plupload, pluploadDir, fileName);
     }
@@ -226,7 +230,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                         thumbnails.mkdirs();
                     }
                     String name = file.getName().substring(0, file.getName().lastIndexOf("."));
-                    videoUtil.process(file.getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap);
+                    videoUtil.process(file.getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap, projectUrl);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

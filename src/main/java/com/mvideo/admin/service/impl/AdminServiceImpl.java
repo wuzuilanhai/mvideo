@@ -20,9 +20,6 @@ public class AdminServiceImpl implements IAdminService {
     @Autowired
     private AdminMapper adminMapper;
 
-    @Value("${test.condition}")
-    private String test;
-
     @Override
     @RequestMapping("/login")
     public Admin login(@RequestBody AdminQuery adminQuery) throws Exception {

@@ -91,6 +91,12 @@
             <version>2.6.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.openimaj</groupId>
+            <artifactId>xuggle-video</artifactId>
+            <version>1.3.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>

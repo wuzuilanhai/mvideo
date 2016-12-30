@@ -4,6 +4,8 @@ import com.mvideo.category.dal.po.Category;
 import com.mvideo.category.service.ICategoryService;
 import com.mvideo.index.dto.CategoryResultDto;
 import com.mvideo.index.dto.PrepareIndexDataDto;
+import com.mvideo.video.dal.po.Video;
+import com.mvideo.video.service.IVideoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +24,13 @@ public class IndexService {
     @Autowired
     private ICategoryService categoryService;
 
+    @Autowired
+    private IVideoService videoService;
+
     @RequestMapping("/index")
     public PrepareIndexDataDto index() {
         PrepareIndexDataDto prepareIndexDataDto = new PrepareIndexDataDto();
+
         List<CategoryResultDto> categoryResultDtoList = new ArrayList<>();
         List<Category> parentCategory = categoryService.getParentCategorys();
         for (Category category : parentCategory) {
@@ -34,7 +40,9 @@ public class IndexService {
             categoryResultDtoList.add(categoryResultDto);
         }
 
+        List<Video> recentlyVideos = videoService.getRecentlyVideos();
 
+        prepareIndexDataDto.setRecentlyVideos(recentlyVideos);
         prepareIndexDataDto.setCategoryResultDtoList(categoryResultDtoList);
         return prepareIndexDataDto;
     }

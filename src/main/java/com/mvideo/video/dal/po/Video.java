@@ -19,7 +19,13 @@ public class Video {
 
     private String thumbnailUrl;
 
+    private String realUrl;
+
     private String state;
+
+    private String duration;
+
+    private String views;
 
     private String remark;
 
@@ -91,12 +97,36 @@ public class Video {
         this.thumbnailUrl = thumbnailUrl == null ? null : thumbnailUrl.trim();
     }
 
+    public String getRealUrl() {
+        return realUrl;
+    }
+
+    public void setRealUrl(String realUrl) {
+        this.realUrl = realUrl == null ? null : realUrl.trim();
+    }
+
     public String getState() {
         return state;
     }
 
     public void setState(String state) {
         this.state = state == null ? null : state.trim();
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration == null ? null : duration.trim();
+    }
+
+    public String getViews() {
+        return views;
+    }
+
+    public void setViews(String views) {
+        this.views = views == null ? null : views.trim();
     }
 
     public String getRemark() {
