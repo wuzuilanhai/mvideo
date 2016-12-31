@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mvideo.user.dal.dao.UserMapper" >
-  <resultMap id="BaseResultMap" type="com.mvideo.video.dal.po.Video" >
-    <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="login_name" property="loginName" jdbcType="VARCHAR" />
-    <result column="login_password" property="loginPassword" jdbcType="VARCHAR" />
-    <result column="real_name" property="realName" jdbcType="VARCHAR" />
-    <result column="sex" property="sex" jdbcType="VARCHAR" />
-    <result column="age" property="age" jdbcType="INTEGER" />
-    <result column="login_time" property="loginTime" jdbcType="TIMESTAMP" />
-    <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP" />
-    <result column="salt" property="salt" jdbcType="VARCHAR" />
+  <resultMap id="BaseResultMap" type="com.mvideo.user.dal.po.User" >
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="login_email" jdbcType="VARCHAR" property="loginEmail" />
+    <result column="login_phone" jdbcType="VARCHAR" property="loginPhone" />
+    <result column="login_password" jdbcType="VARCHAR" property="loginPassword" />
+    <result column="real_name" jdbcType="VARCHAR" property="realName" />
+    <result column="sex" jdbcType="VARCHAR" property="sex" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="login_time" jdbcType="TIMESTAMP" property="loginTime" />
+    <result column="last_update_time" jdbcType="TIMESTAMP" property="lastUpdateTime" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, login_name, login_password, real_name, sex, age, login_time, last_update_time, 
-    salt
+    id, login_email, login_phone, login_password, real_name, sex, age, login_time, last_update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
     from user
     where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getUser" parameterType="com.mvideo.user.dal.po.User" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from user
+    where login_email=#{loginEmail} and login_password=#{loginPassword} or login_phone=#{loginPhone} and login_password=#{loginPassword}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from user
@@ -29,90 +34,90 @@
   <insert id="insert" parameterType="com.mvideo.user.dal.po.User" useGeneratedKeys="true">
     insert into user
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
+      <if test="id != null">
         id,
       </if>
-      <if test="loginName != null" >
-        login_name,
+      <if test="loginEmail != null">
+        login_email,
       </if>
-      <if test="loginPassword != null" >
+      <if test="loginPhone != null">
+        login_phone,
+      </if>
+      <if test="loginPassword != null">
         login_password,
       </if>
-      <if test="realName != null" >
+      <if test="realName != null">
         real_name,
       </if>
-      <if test="sex != null" >
+      <if test="sex != null">
         sex,
       </if>
-      <if test="age != null" >
+      <if test="age != null">
         age,
       </if>
-      <if test="loginTime != null" >
+      <if test="loginTime != null">
         login_time,
       </if>
-      <if test="lastUpdateTime != null" >
+      <if test="lastUpdateTime != null">
         last_update_time,
-      </if>
-      <if test="salt != null" >
-        salt,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
+      <if test="id != null">
         #{id,jdbcType=INTEGER},
       </if>
-      <if test="loginName != null" >
-        #{loginName,jdbcType=VARCHAR},
+      <if test="loginEmail != null">
+        #{loginEmail,jdbcType=VARCHAR},
       </if>
-      <if test="loginPassword != null" >
+      <if test="loginPhone != null">
+        #{loginPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPassword != null">
         #{loginPassword,jdbcType=VARCHAR},
       </if>
-      <if test="realName != null" >
+      <if test="realName != null">
         #{realName,jdbcType=VARCHAR},
       </if>
-      <if test="sex != null" >
+      <if test="sex != null">
         #{sex,jdbcType=VARCHAR},
       </if>
-      <if test="age != null" >
+      <if test="age != null">
         #{age,jdbcType=INTEGER},
       </if>
-      <if test="loginTime != null" >
+      <if test="loginTime != null">
         #{loginTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="lastUpdateTime != null" >
+      <if test="lastUpdateTime != null">
         #{lastUpdateTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="salt != null" >
-        #{salt,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
   <update id="update" parameterType="com.mvideo.user.dal.po.User" >
     update user
     <set >
-      <if test="loginName != null" >
-        login_name = #{loginName,jdbcType=VARCHAR},
+      <if test="loginEmail != null">
+        login_email = #{loginEmail,jdbcType=VARCHAR},
       </if>
-      <if test="loginPassword != null" >
+      <if test="loginPhone != null">
+        login_phone = #{loginPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPassword != null">
         login_password = #{loginPassword,jdbcType=VARCHAR},
       </if>
-      <if test="realName != null" >
+      <if test="realName != null">
         real_name = #{realName,jdbcType=VARCHAR},
       </if>
-      <if test="sex != null" >
+      <if test="sex != null">
         sex = #{sex,jdbcType=VARCHAR},
       </if>
-      <if test="age != null" >
+      <if test="age != null">
         age = #{age,jdbcType=INTEGER},
       </if>
-      <if test="loginTime != null" >
+      <if test="loginTime != null">
         login_time = #{loginTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="lastUpdateTime != null" >
+      <if test="lastUpdateTime != null">
         last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="salt != null" >
-        salt = #{salt,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}

@@ -5,7 +5,9 @@ import java.util.Date;
 public class User {
     private Integer id;
 
-    private String loginName;
+    private String loginEmail;
+
+    private String loginPhone;
 
     private String loginPassword;
 
@@ -19,8 +21,6 @@ public class User {
 
     private Date lastUpdateTime;
 
-    private String salt;
-
     public Integer getId() {
         return id;
     }
@@ -29,12 +29,20 @@ public class User {
         this.id = id;
     }
 
-    public String getLoginName() {
-        return loginName;
+    public String getLoginEmail() {
+        return loginEmail;
     }
 
-    public void setLoginName(String loginName) {
-        this.loginName = loginName == null ? null : loginName.trim();
+    public void setLoginEmail(String loginEmail) {
+        this.loginEmail = loginEmail == null ? null : loginEmail.trim();
+    }
+
+    public String getLoginPhone() {
+        return loginPhone;
+    }
+
+    public void setLoginPhone(String loginPhone) {
+        this.loginPhone = loginPhone == null ? null : loginPhone.trim();
     }
 
     public String getLoginPassword() {
@@ -83,13 +91,5 @@ public class User {
 
     public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt == null ? null : salt.trim();
     }
 }

@@ -13,6 +13,10 @@ public class PrepareIndexDataDto {
 
     List<Video> recentlyVideos;
 
+    List<Video> onlineVideos;
+
+    List<Video> upcomingChannels;
+
     public List<CategoryResultDto> getCategoryResultDtoList() {
         return categoryResultDtoList;
     }
@@ -27,5 +31,21 @@ public class PrepareIndexDataDto {
 
     public void setRecentlyVideos(List<Video> recentlyVideos) {
         this.recentlyVideos = recentlyVideos;
+    }
+
+    public List<Video> getOnlineVideos() {
+        return onlineVideos;
+    }
+
+    public void setOnlineVideos(List<Video> onlineVideos) {
+        this.onlineVideos = onlineVideos;
+    }
+
+    public List<Video> getUpcomingChannels() {
+        return upcomingChannels;
+    }
+
+    public void setUpcomingChannels(List<Video> upcomingChannels) {
+        this.upcomingChannels = upcomingChannels;
     }
 }

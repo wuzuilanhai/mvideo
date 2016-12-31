@@ -15,4 +15,8 @@ public interface VideoMapper extends BaseMapper<Video, Integer> {
 
     List<Video> getRecentlyVideos();
 
+    List<Video> getOnlineVideos();
+
+    List<Video> getOnUpcomingChannels();
+
 }

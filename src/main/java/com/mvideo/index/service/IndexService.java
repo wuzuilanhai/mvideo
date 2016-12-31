@@ -42,7 +42,13 @@ public class IndexService {
 
         List<Video> recentlyVideos = videoService.getRecentlyVideos();
 
+        List<Video> onlineVideos = videoService.getOnlineVideos();
+
+        List<Video> upcomingChannels = videoService.getOnUpcomingChannels();
+
         prepareIndexDataDto.setRecentlyVideos(recentlyVideos);
+        prepareIndexDataDto.setOnlineVideos(onlineVideos);
+        prepareIndexDataDto.setUpcomingChannels(upcomingChannels);
         prepareIndexDataDto.setCategoryResultDtoList(categoryResultDtoList);
         return prepareIndexDataDto;
     }

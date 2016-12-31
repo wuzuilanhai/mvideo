@@ -11,4 +11,8 @@ public interface IVideoService {
 
     List<Video> getRecentlyVideos();
 
+    List<Video> getOnlineVideos();
+
+    List<Video> getOnUpcomingChannels();
+
 }

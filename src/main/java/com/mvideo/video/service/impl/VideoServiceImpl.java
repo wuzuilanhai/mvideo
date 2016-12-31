@@ -1,6 +1,5 @@
 package com.mvideo.video.service.impl;
 
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
 import com.mvideo.video.dal.dao.VideoMapper;
@@ -68,6 +67,18 @@ public class VideoServiceImpl implements IVideoService {
     public List<Video> getRecentlyVideos() {
         PageHelper.startPage(1, 3);
         return videoMapper.getRecentlyVideos();
+    }
+
+    @Override
+    public List<Video> getOnlineVideos() {
+        PageHelper.startPage(1, 6);
+        return videoMapper.getOnlineVideos();
+    }
+
+    @Override
+    public List<Video> getOnUpcomingChannels() {
+        PageHelper.startPage(1, 10);
+        return videoMapper.getOnUpcomingChannels();
     }
 
 }
