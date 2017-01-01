@@ -10,4 +10,6 @@ public interface UserMapper extends BaseMapper<User, Integer> {
 
     User getUser(User user);
 
+    User getUserByEmailOrPhone(User user);
+
 }

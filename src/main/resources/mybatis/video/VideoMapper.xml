@@ -10,7 +10,7 @@
         <result column="url" property="url" jdbcType="VARCHAR"/>
         <result column="oriurl" property="oriurl" jdbcType="VARCHAR"/>
         <result column="thumbnail_url" property="thumbnailUrl" jdbcType="VARCHAR"/>
-        <result column="real_url" jdbcType="VARCHAR" property="realUrl"/>
+        <result column="real_url" jdbcType="VARCHAR" property="realUrl" />
         <result column="state" property="state" jdbcType="VARCHAR"/>
         <result column="duration" jdbcType="VARCHAR" property="duration"/>
         <result column="views" jdbcType="VARCHAR" property="views"/>
@@ -34,20 +34,20 @@
         from video
         where oriurl = #{oriUrl,jdbcType=VARCHAR}
     </select>
-    <select id="getRecentlyVideos" resultMap="BaseResultMap">
+    <select id="getRecentlyVideos" resultType="com.mvideo.video.dal.po.Video">
         select
         <include refid="Base_Column_List"/>
         from video
         where islive = 0
         order by last_update_time desc
     </select>
-    <select id="getOnlineVideos" resultMap="BaseResultMap">
+    <select id="getOnlineVideos" resultType="com.mvideo.video.dal.po.Video">
         select
         <include refid="Base_Column_List"/>
         from video
         where islive = 1
     </select>
-    <select id="getOnUpcomingChannels" resultMap="BaseResultMap">
+    <select id="getOnUpcomingChannels" resultType="com.mvideo.video.dal.po.Video">
         select
         <include refid="Base_Column_List"/>
         from video

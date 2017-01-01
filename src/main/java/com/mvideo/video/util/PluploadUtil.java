@@ -1,5 +1,6 @@
 package com.mvideo.video.util;
 
+import com.mvideo.common.util.MD5Util;
 import com.mvideo.configuration.dal.po.Configuration;
 import com.mvideo.configuration.service.IConfigurationService;
 import com.mvideo.video.constant.VideoConstants;
@@ -229,7 +230,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                     if (!thumbnails.exists()) {
                         thumbnails.mkdirs();
                     }
-                    String name = file.getName().substring(0, file.getName().lastIndexOf("."));
+                    String name = MD5Util.md5(file.getName().substring(0, file.getName().lastIndexOf(".")) + new Date().getTime());
                     videoUtil.process(file.getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap, projectUrl);
                 } catch (Exception e) {
                     e.printStackTrace();

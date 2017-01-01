@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,15 @@ public class UserServiceImpl implements IUserService {
     public Object register(User user) {
         Map<String, String> message = new HashMap<>();
         user.setLoginPassword(MD5Util.md5(user.getLoginPassword()));
+        //判断是否已经被注册过
+        if (userMapper.getUserByEmailOrPhone(user) != null) {
+            message.put("status", "fail,the accout has exist!");
+            return message;
+        }
+        Date date = new Date();
+        user.setLastUpdateTime(date);
+        user.setLoginTime(date);
+        user.setRealName("游客");
         if (userMapper.insert(user) > 0) {
             message.put("status", "success");
         } else {
@@ -61,6 +71,7 @@ public class UserServiceImpl implements IUserService {
             try {
                 String token = TokenUtil.authentication(map);
                 redisUtil.set(findUser.getLoginEmail() + findUser.getLoginPhone() + findUser.getId(), token, expireTime);
+                userReturn.setToken(token);
             } catch (Exception e) {
                 userReturn.setMessage("fail");
                 throw new RuntimeException("token生成失败!");
