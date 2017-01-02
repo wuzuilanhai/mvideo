@@ -123,7 +123,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                                     srcFile.delete();
                                 }
                                 //每当文件上传完毕，将上传信息插入数据库
-                                updateVideoState(targetFile);
+                                updateVideoState(multipartHttpServletRequest, targetFile);
 
                                 //添加数据到延迟队列，开始转码
                                 convertQueue.add(new DelayQueueNode(targetFile, System.currentTimeMillis() + 1000));
@@ -133,7 +133,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                             multipartFile.transferTo(targetFile);
 
                             //每当文件上传完毕，将上传信息插入数据库
-                            updateVideoState(targetFile);
+                            updateVideoState(multipartHttpServletRequest, targetFile);
 
                             //添加数据到延迟队列，开始转码
                             convertQueue.add(new DelayQueueNode(targetFile, System.currentTimeMillis() + VideoConstants.CONVERT_TIME_DELAY));
@@ -146,14 +146,18 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
         }
     }
 
-    private void updateVideoState(File targetFile) throws Exception {
+    private void updateVideoState(MultipartHttpServletRequest multipartHttpServletRequest, File targetFile) throws Exception {
         VideoState videoState = videoStateMapper.selectByVideoPath(targetFile.getPath());
         videoState.setLevel(VideoConstants.Video.STATE_02.getLevel());
         videoState.setName(VideoConstants.Video.STATE_02.getName());
         videoStateMapper.update(videoState);
 
         Video video = new Video();
-        video.setName(targetFile.getName());
+        video.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
+        video.setName(multipartHttpServletRequest.getParameter("videoRemark"));
+        video.setRemark(multipartHttpServletRequest.getParameter("videoRemark"));
+        video.setCategoryId(Integer.parseInt(multipartHttpServletRequest.getParameter("categoryId")));
+        video.setIntro(multipartHttpServletRequest.getParameter("videoIntro"));
         video.setIslive(VideoConstants.IS_NOT_LIVE);
         video.setLastUpdateTime(new Date());
         video.setState(VideoConstants.VideoAudit.AUDIT_01.getAuditState());

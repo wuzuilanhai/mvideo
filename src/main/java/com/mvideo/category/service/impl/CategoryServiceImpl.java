@@ -37,11 +37,11 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     @RequestMapping("getChildrenCategory")
     public List<Category> getChildrenCategorys(Integer parentId) {
-        if (redisUtil.get("childrenCategory") != null) {
-            return (List<Category>) redisUtil.get("childrenCategory");
+        if (redisUtil.get("childrenCategory"+parentId) != null) {
+            return (List<Category>) redisUtil.get("childrenCategory"+parentId);
         }
         List<Category> categoryList = categoryDao.getChildrenCategorys(parentId);
-        redisUtil.set("childrenCategory", categoryList);
+        redisUtil.set("childrenCategory"+parentId, categoryList);
         return categoryList;
     }
 
