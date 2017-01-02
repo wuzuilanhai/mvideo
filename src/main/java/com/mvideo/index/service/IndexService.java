@@ -2,6 +2,7 @@ package com.mvideo.index.service;
 
 import com.mvideo.category.dal.po.Category;
 import com.mvideo.category.service.ICategoryService;
+import com.mvideo.common.dto.PageQueryDto;
 import com.mvideo.index.dto.CategoryResultDto;
 import com.mvideo.index.dto.PrepareIndexDataDto;
 import com.mvideo.video.dal.po.Video;
@@ -28,7 +29,7 @@ public class IndexService {
     private IVideoService videoService;
 
     @RequestMapping("/index")
-    public PrepareIndexDataDto index() {
+    public PrepareIndexDataDto index(PageQueryDto pageQueryDto) {
         PrepareIndexDataDto prepareIndexDataDto = new PrepareIndexDataDto();
 
         List<CategoryResultDto> categoryResultDtoList = new ArrayList<>();
@@ -40,7 +41,7 @@ public class IndexService {
             categoryResultDtoList.add(categoryResultDto);
         }
 
-        List<Video> recentlyVideos = videoService.getRecentlyVideos();
+        List<Video> recentlyVideos = videoService.getRecentlyVideos(pageQueryDto);
 
         List<Video> onlineVideos = videoService.getOnlineVideos();
 

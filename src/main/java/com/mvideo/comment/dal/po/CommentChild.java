@@ -1,21 +1,15 @@
 package com.mvideo.comment.dal.po;
 
-import java.util.Date;
-
-public class Comment {
+public class CommentChild {
     private Integer id;
 
     private String content;
 
-    private Integer hasChild;
-
-    private Date subTime;
+    private Integer parentId;
 
     private Integer userId;
 
     private String userName;
-
-    private Integer videoId;
 
     public Integer getId() {
         return id;
@@ -33,20 +27,12 @@ public class Comment {
         this.content = content == null ? null : content.trim();
     }
 
-    public Integer getHasChild() {
-        return hasChild;
+    public Integer getParentId() {
+        return parentId;
     }
 
-    public void setHasChild(Integer hasChild) {
-        this.hasChild = hasChild;
-    }
-
-    public Date getSubTime() {
-        return subTime;
-    }
-
-    public void setSubTime(Date subTime) {
-        this.subTime = subTime;
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 
     public Integer getUserId() {
@@ -63,13 +49,5 @@ public class Comment {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public Integer getVideoId() {
-        return videoId;
-    }
-
-    public void setVideoId(Integer videoId) {
-        this.videoId = videoId;
     }
 }

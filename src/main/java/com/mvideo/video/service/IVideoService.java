@@ -1,5 +1,6 @@
 package com.mvideo.video.service;
 
+import com.mvideo.common.dto.PageQueryDto;
 import com.mvideo.video.dal.po.Video;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface IVideoService {
 
-    List<Video> getRecentlyVideos();
+    List<Video> getRecentlyVideos(PageQueryDto pageQueryDto);
 
     List<Video> getOnlineVideos();
 
