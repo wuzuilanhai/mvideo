@@ -9,6 +9,8 @@ public class CheckUpload {
 
     private Long chunk_size;
 
+    private Integer userId;
+
     public String getFilename() {
         return filename;
     }
@@ -25,4 +27,11 @@ public class CheckUpload {
         this.chunk_size = chunk_size;
     }
 
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 }

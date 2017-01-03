@@ -41,7 +41,8 @@ public class VideoServiceImpl implements IVideoService {
     @RequestMapping("/checkUpload")
     public CheckResult checkUpload(CheckUpload checkUpload) throws Exception {
         String tmpFileName = "upload/" + checkUpload.getFilename() + "_tmp_";
-        List<VideoCheck> videoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(tmpFileName);
+        checkUpload.setFilename(tmpFileName);
+        List<VideoCheck> videoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(checkUpload);
         CheckResult checkResult = new CheckResult();
         if (videoChecks.size() != 0) {
             Integer currentChunk = videoChecks.get(0).getCurrentChunk();

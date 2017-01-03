@@ -11,6 +11,8 @@ public class VideoCheck {
 
     private Long chunkSize;
 
+    private Integer userId;
+
     public Integer getId() {
         return id;
     }
@@ -49,5 +51,13 @@ public class VideoCheck {
 
     public void setChunkSize(Long chunkSize) {
         this.chunkSize = chunkSize;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

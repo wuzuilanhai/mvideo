@@ -10,6 +10,7 @@ import com.mvideo.video.dal.dao.VideoStateMapper;
 import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dal.po.VideoState;
+import com.mvideo.video.dto.CheckUpload;
 import com.mvideo.video.dto.Plupload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,7 +107,12 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                             //更新数据库表video_check的数据
                             VideoCheck videoCheck = new VideoCheck();
                             videoCheck.setCurrentChunk(plupload.getChunk());
-                            List<VideoCheck> findVideoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(prefixName);
+                            videoCheck.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
+
+                            CheckUpload checkUpload=new CheckUpload();
+                            checkUpload.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
+                            checkUpload.setFilename(prefixName);
+                            List<VideoCheck> findVideoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(checkUpload);
                             if (findVideoChecks.size() == 0) {
                                 videoCheck.setTmpFileName(tmpFileName);
                                 videoCheckMapper.insert(videoCheck);

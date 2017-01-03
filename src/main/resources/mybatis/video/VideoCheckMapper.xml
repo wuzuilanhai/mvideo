@@ -7,9 +7,10 @@
         <result column="tmp_dir" property="tmpDir" jdbcType="VARCHAR"/>
         <result column="current_chunk" property="currentChunk" jdbcType="INTEGER"/>
         <result column="chunk_size" property="chunkSize" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, tmp_file_name, tmp_dir, current_chunk, chunk_size
+    id, tmp_file_name, tmp_dir, current_chunk, chunk_size, user_id
   </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
@@ -27,7 +28,7 @@
         select
         <include refid="Base_Column_List"/>
         from video_check
-        where tmp_file_name like "%${value}%"
+        where tmp_file_name like "%${filename}%" and user_id=#{userId}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from video_check
@@ -51,6 +52,9 @@
             <if test="chunkSize != null">
                 chunk_size,
             </if>
+            <if test="userId != null">
+                user_id,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -68,6 +72,9 @@
             <if test="chunkSize != null">
                 #{chunkSize,jdbcType=INTEGER},
             </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
         </trim>
     </insert>
     <update id="update" parameterType="com.mvideo.video.dal.po.VideoCheck">
@@ -84,6 +91,9 @@
             </if>
             <if test="chunkSize != null">
                 chunk_size = #{chunkSize,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
             </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
