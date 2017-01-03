@@ -2,6 +2,8 @@ package com.mvideo.video.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.mvideo.common.dto.PageQueryDto;
+import com.mvideo.common.dto.PageResultDto;
+import com.mvideo.common.util.PageUtil;
 import com.mvideo.video.dal.dao.VideoCheckMapper;
 import com.mvideo.video.dal.dao.VideoMapper;
 import com.mvideo.video.dal.po.Video;
@@ -9,6 +11,7 @@ import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dto.CheckResult;
 import com.mvideo.video.dto.CheckUpload;
 import com.mvideo.video.dto.Plupload;
+import com.mvideo.video.dto.VideoHistoryQueryDto;
 import com.mvideo.video.util.PluploadUtil;
 import com.mvideo.video.service.IVideoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +85,13 @@ public class VideoServiceImpl implements IVideoService {
     public List<Video> getOnUpcomingChannels() {
         PageHelper.startPage(1, 10);
         return videoMapper.getOnUpcomingChannels();
+    }
+
+    @RequestMapping("/getHistoryVideo")
+    public PageResultDto<Video> getHistoryVideo(VideoHistoryQueryDto videoHistoryQueryDto) {
+        PageHelper.startPage(videoHistoryQueryDto.getPageNum(), videoHistoryQueryDto.getPageSize());
+        List<Video> videos = videoMapper.getHistoryVideo(videoHistoryQueryDto.getUserId());
+        return PageUtil.getPageResult(videos);
     }
 
 }
