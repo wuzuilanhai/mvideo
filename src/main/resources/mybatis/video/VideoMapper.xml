@@ -28,11 +28,11 @@
         from video
         where id = #{id,jdbcType=INTEGER}
     </select>
-    <select id="selectByOriUrl" resultMap="BaseResultMap" parameterType="java.lang.String">
+    <select id="selectByOriUrl" resultMap="BaseResultMap" parameterType="com.mvideo.video.dto.CheckUpload">
         select
         <include refid="Base_Column_List"/>
         from video
-        where oriurl = #{oriUrl,jdbcType=VARCHAR}
+        where oriurl = #{filename} and user_id = #{userId}
     </select>
     <select id="getHistoryVideo" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select

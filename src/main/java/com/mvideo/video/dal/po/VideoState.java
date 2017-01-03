@@ -9,6 +9,8 @@ public class VideoState {
 
     private String videoPath;
 
+    private Integer userId;
+
     public Integer getId() {
         return id;
     }
@@ -39,5 +41,13 @@ public class VideoState {
 
     public void setVideoPath(String videoPath) {
         this.videoPath = videoPath == null ? null : videoPath.trim();
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

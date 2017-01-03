@@ -24,7 +24,7 @@
         from video_check
         where tmp_file_name= #{tmpFileName,jdbcType=VARCHAR}
     </select>
-    <select id="selectByTmpFileNameLimitOne" resultMap="BaseResultMap" parameterType="java.lang.String">
+    <select id="selectByTmpFileNameLimitOne" resultMap="BaseResultMap" parameterType="com.mvideo.video.dto.CheckUpload">
         select
         <include refid="Base_Column_List"/>
         from video_check

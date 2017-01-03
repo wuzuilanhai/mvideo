@@ -2,6 +2,7 @@ package com.mvideo.video.dal.dao;
 
 import com.mvideo.common.dao.BaseMapper;
 import com.mvideo.video.dal.po.Video;
+import com.mvideo.video.dto.CheckUpload;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public interface VideoMapper extends BaseMapper<Video, Integer> {
 
-    Video selectByOriUrl(String oriUrl) throws Exception;
+    Video selectByOriUrl(CheckUpload checkUpload) throws Exception;
 
     List<Video> getRecentlyVideos();
 

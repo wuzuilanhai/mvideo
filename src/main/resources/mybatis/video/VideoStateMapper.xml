@@ -6,9 +6,10 @@
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="level" jdbcType="INTEGER" property="level"/>
         <result column="video_path" jdbcType="VARCHAR" property="videoPath"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, name, level, video_path
+        id, name, level, video_path, user_id
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -16,11 +17,11 @@
         from video_state
         where id = #{id,jdbcType=INTEGER}
     </select>
-    <select id="selectByVideoPath" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <select id="selectByVideoPath" parameterType="com.mvideo.video.dto.CheckUpload" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from video_state
-        where video_path = "${value}"
+        where video_path = #{filename} and user_id = #{userId}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete from video_state
@@ -41,6 +42,9 @@
             <if test="videoPath != null">
                 video_path,
             </if>
+            <if test="userId != null">
+                user_id,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -55,6 +59,9 @@
             <if test="videoPath != null">
                 #{videoPath,jdbcType=VARCHAR},
             </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
         </trim>
     </insert>
     <update id="update" parameterType="com.mvideo.video.dal.po.VideoState">
@@ -68,6 +75,9 @@
             </if>
             <if test="videoPath != null">
                 video_path = #{videoPath,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
             </if>
         </set>
         where id = #{id,jdbcType=INTEGER}

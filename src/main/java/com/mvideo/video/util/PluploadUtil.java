@@ -11,6 +11,7 @@ import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoCheck;
 import com.mvideo.video.dal.po.VideoState;
 import com.mvideo.video.dto.CheckUpload;
+import com.mvideo.video.dto.DelayQueueDto;
 import com.mvideo.video.dto.Plupload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,17 +90,18 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                     for (MultipartFile multipartFile : multipartFileList) {//循环只进行一次
 
                         plupload.setMultipartFile(multipartFile);//手动向Plupload对象传入MultipartFile属性值
-                        File targetFile = new File(pluploadDir + "/" + fileName);//新建目标文件，只有被流写入时才会真正存在
+                        File targetFile = new File(pluploadDir + "/" + multipartHttpServletRequest.getParameter("userId") + fileName);//新建目标文件，只有被流写入时才会真正存在
                         if (plupload.getChunk() == 0) {
                             //保存视频状态
                             VideoState videoState = new VideoState();
                             videoState.setName(VideoConstants.Video.STATE_01.getName());
                             videoState.setLevel(VideoConstants.Video.STATE_01.getLevel());
                             videoState.setVideoPath(targetFile.getPath());
+                            videoState.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
                             videoStateMapper.insert(videoState);
                         }
                         if (chunks > 1) {//用户上传资料总块数大于1，要进行合并
-                            String prefixName = pluploadDir.getPath() + "/" + plupload.getName() + "_tmp_";
+                            String prefixName = pluploadDir.getPath() + "/" + multipartHttpServletRequest.getParameter("userId") + plupload.getName() + "_tmp_";
                             String tmpFileName = prefixName + plupload.getChunk();
                             File tempFile = new File(tmpFileName);
                             //保存每一块的内容在临时文件中
@@ -109,7 +111,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                             videoCheck.setCurrentChunk(plupload.getChunk());
                             videoCheck.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
 
-                            CheckUpload checkUpload=new CheckUpload();
+                            CheckUpload checkUpload = new CheckUpload();
                             checkUpload.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
                             checkUpload.setFilename(prefixName);
                             List<VideoCheck> findVideoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(checkUpload);
@@ -132,7 +134,10 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                                 updateVideoState(multipartHttpServletRequest, targetFile);
 
                                 //添加数据到延迟队列，开始转码
-                                convertQueue.add(new DelayQueueNode(targetFile, System.currentTimeMillis() + 1000));
+                                DelayQueueDto delayQueueDto = new DelayQueueDto();
+                                delayQueueDto.setFile(targetFile);
+                                delayQueueDto.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
+                                convertQueue.add(new DelayQueueNode(delayQueueDto, System.currentTimeMillis() + 1000));
                             }
                         } else {
                             //只有一块，就直接拷贝文件内容
@@ -153,7 +158,11 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
     }
 
     private void updateVideoState(MultipartHttpServletRequest multipartHttpServletRequest, File targetFile) throws Exception {
-        VideoState videoState = videoStateMapper.selectByVideoPath(targetFile.getPath());
+        CheckUpload checkUpload = new CheckUpload();
+        checkUpload.setFilename(targetFile.getPath());
+        checkUpload.setUserId(Integer.parseInt(multipartHttpServletRequest.getParameter("userId")));
+
+        VideoState videoState = videoStateMapper.selectByVideoPath(checkUpload);
         videoState.setLevel(VideoConstants.Video.STATE_02.getLevel());
         videoState.setName(VideoConstants.Video.STATE_02.getName());
         videoStateMapper.update(videoState);
@@ -200,7 +209,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
         }
     }
 
-    private BlockingQueue<DelayQueueNode<File>> convertQueue = new DelayQueue();
+    private BlockingQueue<DelayQueueNode<DelayQueueDto>> convertQueue = new DelayQueue();
 
     private Runnable runnable = new Runnable() {
         @Override
@@ -231,7 +240,7 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
             while (true) {
                 try {
                     //开始转码
-                    File file = convertQueue.take().getValue();
+                    DelayQueueDto delayQueueDto = convertQueue.take().getValue();
                     File convertDir = new File("converts");
                     if (!convertDir.exists()) {
                         convertDir.mkdirs();
@@ -240,8 +249,8 @@ public class PluploadUtil implements ApplicationListener<ContextRefreshedEvent> 
                     if (!thumbnails.exists()) {
                         thumbnails.mkdirs();
                     }
-                    String name = MD5Util.md5(file.getName().substring(0, file.getName().lastIndexOf(".")) + new Date().getTime());
-                    videoUtil.process(file.getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap, projectUrl);
+                    String name = MD5Util.md5(delayQueueDto.getFile().getName().substring(0, delayQueueDto.getFile().getName().lastIndexOf(".")) + new Date().getTime());
+                    videoUtil.process(delayQueueDto.getFile().getPath(), convertDir + "/" + name + convertVideoSuffix, thumbnails + "/" + name + thumbnailImgSuffix, configurationMap, projectUrl, delayQueueDto.getUserId());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

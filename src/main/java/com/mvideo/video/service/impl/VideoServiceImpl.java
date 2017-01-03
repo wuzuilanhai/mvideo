@@ -40,7 +40,7 @@ public class VideoServiceImpl implements IVideoService {
 
     @RequestMapping("/checkUpload")
     public CheckResult checkUpload(CheckUpload checkUpload) throws Exception {
-        String tmpFileName = "upload/" + checkUpload.getFilename() + "_tmp_";
+        String tmpFileName = "upload/" + checkUpload.getUserId() + checkUpload.getFilename() + "_tmp_";
         checkUpload.setFilename(tmpFileName);
         List<VideoCheck> videoChecks = videoCheckMapper.selectByTmpFileNameLimitOne(checkUpload);
         CheckResult checkResult = new CheckResult();
@@ -56,6 +56,9 @@ public class VideoServiceImpl implements IVideoService {
 
     @RequestMapping("/upload")
     public void upload(Plupload plupload, HttpServletRequest request) throws Exception {
+        if (plupload.getChunk() >= plupload.getChunks()) {
+            return;
+        }
         String fileDir = "upload";
         plupload.setRequest(request);
         //文件存储绝对路径 request.getSession().getServletContext().getRealPath("/")

@@ -6,6 +6,7 @@ import com.mvideo.video.dal.dao.VideoMapper;
 import com.mvideo.video.dal.dao.VideoStateMapper;
 import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoState;
+import com.mvideo.video.dto.CheckUpload;
 import com.xuggle.xuggler.IContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,11 @@ public class VideoUtil {
     private VideoStateMapper videoStateMapper;
 
     @Transactional
-    public void process(String videoPath, String targetPath, String imgTargetPath, Map<String, Configuration> configurationMap, String projectUrl) throws Exception {
+    public void process(String videoPath, String targetPath, String imgTargetPath, Map<String, Configuration> configurationMap, String projectUrl,Integer userId) throws Exception {
         int type = checkContentType(videoPath);
         if (type == 0) {
-            generateVideoThumbnailImg(videoPath, imgTargetPath, projectUrl);
-            ffmpegTransVideo(videoPath, targetPath, configurationMap, projectUrl);
+            generateVideoThumbnailImg(videoPath, imgTargetPath, projectUrl,userId);
+            ffmpegTransVideo(videoPath, targetPath, configurationMap, projectUrl,userId);
         }
     }
 
@@ -74,7 +75,7 @@ public class VideoUtil {
      * @param imgPath    目标路径 -- 生成缩略图文件(.jpg)
      */
     @Transactional
-    private void generateVideoThumbnailImg(String videoPath, String imgPath, String projectUrl) throws Exception {
+    private void generateVideoThumbnailImg(String videoPath, String imgPath, String projectUrl,Integer userId) throws Exception {
         List<String> command = new java.util.ArrayList<String>();
         command.add(ffmpegPath);
         command.add("-i");
@@ -91,12 +92,15 @@ public class VideoUtil {
         command.add(imgPath);
         boolean success = startConvert(parseCommand(command));
         if (success) {
-            VideoState videoState = videoStateMapper.selectByVideoPath(videoPath);
+            CheckUpload checkUpload=new CheckUpload();
+            checkUpload.setFilename(videoPath);
+            checkUpload.setUserId(userId);
+            VideoState videoState = videoStateMapper.selectByVideoPath(checkUpload);
             videoState.setLevel(VideoConstants.Video.STATE_03.getLevel());
             videoState.setName(VideoConstants.Video.STATE_03.getName());
             videoStateMapper.update(videoState);
 
-            Video video = videoMapper.selectByOriUrl(videoPath);
+            Video video = videoMapper.selectByOriUrl(checkUpload);
             video.setThumbnailUrl(imgPath);
             video.setRealUrl(projectUrl + "/" + imgPath);
             videoMapper.update(video);
@@ -113,7 +117,7 @@ public class VideoUtil {
      * @return
      */
     @Transactional
-    private void ffmpegTransVideo(String videoPath, String targetPath, Map<String, Configuration> configurationMap, String projectUrl) throws Exception {
+    private void ffmpegTransVideo(String videoPath, String targetPath, Map<String, Configuration> configurationMap, String projectUrl,Integer userId) throws Exception {
         List<String> command = new java.util.ArrayList<String>();
         command.add(ffmpegPath);
         command.add("-i");
@@ -140,12 +144,15 @@ public class VideoUtil {
         command.add(targetPath);
         boolean success = startConvert(parseCommand(command));
         if (success) {
-            VideoState videoState = videoStateMapper.selectByVideoPath(videoPath);
+            CheckUpload checkUpload=new CheckUpload();
+            checkUpload.setFilename(videoPath);
+            checkUpload.setUserId(userId);
+            VideoState videoState = videoStateMapper.selectByVideoPath(checkUpload);
             videoState.setLevel(VideoConstants.Video.STATE_04.getLevel());
             videoState.setName(VideoConstants.Video.STATE_04.getName());
             videoStateMapper.update(videoState);
 
-            Video video = videoMapper.selectByOriUrl(videoPath);
+            Video video = videoMapper.selectByOriUrl(checkUpload);
             video.setUrl(projectUrl + "/" + targetPath);
             video.setViews("0");
             video.setDuration(getVideoTime(targetPath));
