@@ -52,7 +52,7 @@
         select
         <include refid="Base_Column_List"/>
         from video
-        where islive = 0
+        where islive = 0 and thumbnail_url is not null and url is not null
         order by last_update_time desc
     </select>
     <select id="getOnlineVideos" resultType="com.mvideo.video.dal.po.Video">
