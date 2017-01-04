@@ -41,6 +41,13 @@
         where islive = 0 and user_id = #{userId}
         order by last_update_time desc
     </select>
+    <select id="search" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from video
+        where islive = 0 and ( name like "%${value}%" or intro like "%${value}%" or remark like "%${value}%" )
+        order by last_update_time desc
+    </select>
     <select id="getRecentlyVideos" resultType="com.mvideo.video.dal.po.Video">
         select
         <include refid="Base_Column_List"/>

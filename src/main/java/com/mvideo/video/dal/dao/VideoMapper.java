@@ -21,4 +21,6 @@ public interface VideoMapper extends BaseMapper<Video, Integer> {
     List<Video> getOnUpcomingChannels();
 
     List<Video> getHistoryVideo(Integer userId);
+
+    List<Video> search(String keyWord);
 }

@@ -8,10 +8,7 @@ import com.mvideo.video.dal.dao.VideoCheckMapper;
 import com.mvideo.video.dal.dao.VideoMapper;
 import com.mvideo.video.dal.po.Video;
 import com.mvideo.video.dal.po.VideoCheck;
-import com.mvideo.video.dto.CheckResult;
-import com.mvideo.video.dto.CheckUpload;
-import com.mvideo.video.dto.Plupload;
-import com.mvideo.video.dto.VideoHistoryQueryDto;
+import com.mvideo.video.dto.*;
 import com.mvideo.video.util.PluploadUtil;
 import com.mvideo.video.service.IVideoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +92,13 @@ public class VideoServiceImpl implements IVideoService {
     public PageResultDto<Video> getHistoryVideo(VideoHistoryQueryDto videoHistoryQueryDto) {
         PageHelper.startPage(videoHistoryQueryDto.getPageNum(), videoHistoryQueryDto.getPageSize());
         List<Video> videos = videoMapper.getHistoryVideo(videoHistoryQueryDto.getUserId());
+        return PageUtil.getPageResult(videos);
+    }
+
+    @RequestMapping("/search")
+    public PageResultDto<Video> search(VideoSearchQueryDto videoSearchQueryDto) {
+        PageHelper.startPage(videoSearchQueryDto.getPageNum(), videoSearchQueryDto.getPageSize());
+        List<Video> videos = videoMapper.search(videoSearchQueryDto.getKeyWord());
         return PageUtil.getPageResult(videos);
     }
 
